@@ -3,6 +3,7 @@ const STORAGE_KEY = "hmr_ui_sketch_v1";
 const elDate = document.getElementById("date");
 const elCP1 = document.getElementById("cp1");
 const elCP2 = document.getElementById("cp2");
+const elCP3 = document.getElementById("cp3");
 const elScriptUrl = document.getElementById("scriptUrl");
 const statusEl = document.getElementById("status");
 
@@ -34,6 +35,7 @@ function save(){
       date: elDate.value || "",
       cp1: elCP1.value || "",
       cp2: elCP2.value || "",
+      cp3: elCP3.value || "",
       scriptUrl: elScriptUrl.value || "",
       draftKey: elDraftKey.value || ""
     },
@@ -72,6 +74,7 @@ function load(){
     elDate.value = data.header?.date || "";
     elCP1.value = data.header?.cp1 || "";
     elCP2.value = data.header?.cp2 || "";
+    elCP3.value = data.header?.cp3 || "";
     elScriptUrl.value = data.header?.scriptUrl || "";
     elDraftKey.value = data.header?.draftKey || "";
 
@@ -269,7 +272,7 @@ document.getElementById("clearSaved").addEventListener("click", () => {
   location.reload();
 });
 
-[elDate, elCP1, elCP2, elScriptUrl].forEach(el => el.addEventListener("input", save));
+[elDate, elCP1, elCP2, elCP3, elScriptUrl].forEach(el => el.addEventListener("input", save));
 
 // ---------- Submit ----------
 function buildPayload(){
@@ -296,6 +299,7 @@ function buildPayload(){
     date: elDate.value || "",
     cp1: elCP1.value || "",
     cp2: elCP2.value || "",
+    cp3: elCP3.value || "",
     manpower: manpowerFiltered,
     equipment: serializeEquip(rowsEquip)
   };
@@ -417,6 +421,7 @@ function buildDraftObject() {
       date: elDate.value || "",
       cp1: elCP1.value || "",
       cp2: elCP2.value || "",
+      cp3: elCP3.value || "",
       scriptUrl: elScriptUrl.value || "",
       draftKey: elDraftKey.value || ""
     },
@@ -462,6 +467,7 @@ function saveLocalSilent(){
       date: elDate.value || "",
       cp1: elCP1.value || "",
       cp2: elCP2.value || "",
+      cp3: elCP3.value || "",
       scriptUrl: elScriptUrl.value || "",
       draftKey: elDraftKey.value || ""
     },
@@ -516,6 +522,7 @@ function loadDraftFromCloud() {
       elDate.value = d.header?.date || elDate.value;
       elCP1.value = d.header?.cp1 || elCP1.value;
       elCP2.value = d.header?.cp2 || elCP2.value;
+      elCP3.value = d.header?.cp3 || elCP3.value;
 
       rowsHEO.innerHTML = "";
       rowsSpotter.innerHTML = "";
