@@ -467,7 +467,13 @@ async function saveDraftToCloud() {
     // let json; try { json = JSON.parse(text); } catch { json = null; }
 
     saveLocalSilent();
+
+    // ✅ make switching instant + always updated
+    draftMemoryCache.set(key, buildDraftObject());
+    lastLoadedDraftKey = key;
+    
     setStatus("Draft saved to cloud ✅");
+
   } catch (e) {
     setStatus("Draft save failed: " + e.message, false);
   }
@@ -563,9 +569,11 @@ async function loadDraftFromCloud() {
 
     // ✅ Apply
     applyDraft(json.data);
-
+    
     lastLoadedDraftKey = key;
     setStatus("Loaded draft from cloud ✅");
+    // ✅ update memory cache so future loads are instant + updated
+    
   } catch (e) {
     setStatus("Draft load failed: " + e.message, false);
   }
