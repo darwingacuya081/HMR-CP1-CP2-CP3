@@ -18,6 +18,9 @@ const elDraftKey = document.getElementById("draftKey");
 const btnSaveDraft = document.getElementById("saveDraft");
 const btnLoadDraft = document.getElementById("loadDraft");
 
+const draftMemoryCache = new Map(); // key -> draft data
+let lastLoadedDraftKey = "";
+
 
 function setStatus(msg, ok = true){
   statusEl.textContent = msg;
@@ -498,10 +501,45 @@ function saveLocalSilent(){
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
+function applyDraft(d) {
+  elDate.value = d.header?.date || elDate.value;
+  elCP1.value = d.header?.cp1 || elCP1.value;
+  elCP2.value = d.header?.cp2 || elCP2.value;
+  elCP3.value = d.header?.cp3 || elCP3.value;
+  elCPSite.value = d.header?.cpSite || elCPSite.value;
+
+  rowsHEO.innerHTML = "";
+  rowsSpotter.innerHTML = "";
+  rowsHelper.innerHTML = "";
+  rowsFlagman.innerHTML = "";
+  rowsEquip.innerHTML = "";
+
+  (d.manpower?.HEO || []).forEach(r => addManRow("HEO", r));
+  (d.manpower?.Spotter || []).forEach(r => addManRow("Spotter", r));
+  (d.manpower?.Helper || []).forEach(r => addManRow("Helper", r));
+  (d.manpower?.Flagman || []).forEach(r => addManRow("Flagman", r));
+  (d.equipment || []).forEach(r => addEquipRow(r));
+
+  saveLocalSilent();
+}
+
 async function loadDraftFromCloud() {
   const url = (elScriptUrl.value || "").trim();
   const key = (elDraftKey.value || "").trim();
   if (!url || !key) return setStatus("Set Script URL and Draft Key first.", false);
+
+  // ✅ If same key is already loaded, do nothing
+  if (key === lastLoadedDraftKey) {
+    return setStatus("Draft already loaded ✅");
+  }
+
+  // ✅ If we already loaded this key before, load instantly from memory
+  if (draftMemoryCache.has(key)) {
+    setStatus("Loading draft (memory cache)...");
+    applyDraft(draftMemoryCache.get(key));
+    lastLoadedDraftKey = key;
+    return setStatus("Loaded draft instantly ✅");
+  }
 
   setStatus("Loading draft from cloud...");
 
@@ -520,27 +558,13 @@ async function loadDraftFromCloud() {
       return setStatus("No saved draft found for that key.", false);
     }
 
-    const d = json.data;
+    // ✅ Save to memory cache
+    draftMemoryCache.set(key, json.data);
 
-    elDate.value = d.header?.date || elDate.value;
-    elCP1.value = d.header?.cp1 || elCP1.value;
-    elCP2.value = d.header?.cp2 || elCP2.value;
-    elCP3.value = d.header?.cp3 || elCP3.value;
-    elCPSite.value = d.header?.cpSite || elCPSite.value;
+    // ✅ Apply
+    applyDraft(json.data);
 
-    rowsHEO.innerHTML = "";
-    rowsSpotter.innerHTML = "";
-    rowsHelper.innerHTML = "";
-    rowsFlagman.innerHTML = "";
-    rowsEquip.innerHTML = "";
-
-    (d.manpower?.HEO || []).forEach(r => addManRow("HEO", r));
-    (d.manpower?.Spotter || []).forEach(r => addManRow("Spotter", r));
-    (d.manpower?.Helper || []).forEach(r => addManRow("Helper", r));
-    (d.manpower?.Flagman || []).forEach(r => addManRow("Flagman", r));
-    (d.equipment || []).forEach(r => addEquipRow(r));
-
-    saveLocalSilent();
+    lastLoadedDraftKey = key;
     setStatus("Loaded draft from cloud ✅");
   } catch (e) {
     setStatus("Draft load failed: " + e.message, false);
