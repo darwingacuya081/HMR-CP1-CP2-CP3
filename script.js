@@ -322,7 +322,7 @@ function buildPayload(){
 async function submitAll(){
   const url = FIXED_API_URL;
 
-  const payload = buildPayload();
+  const payload = { action: "submitAll", ...buildPayload() };
   if(!payload.date) return setStatus("Date is required.", false);
 
   setStatus("Submitting...");
